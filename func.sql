@@ -16,7 +16,7 @@ CREATE OR REPLACE FUNCTION routeDistance (routeid INTEGER) RETURNS FLOAT as $dis
                 dz INTEGER;
         BEGIN
                 SELECT ROUTE.startid INTO startid FROM ROUTE WHERE routeid = ROUTE.id;
-                SELECT ROUTE.finishid INTO finishid FROM ROUTE WHERE routeid = ROUTE.id;
+		SELECT ROUTE.endid INTO finishid FROM ROUTE WHERE routeid = ROUTE.id;
                 IF NOT FOUND THEN
                         RAISE EXCEPTION 'Route % not found!', routeid;
                 END IF;
@@ -25,6 +25,9 @@ CREATE OR REPLACE FUNCTION routeDistance (routeid INTEGER) RETURNS FLOAT as $dis
                 END IF;
                 SELECT PLACE.x, PLACE.y, PLACE.z, PLACE.galaxy INTO startX, startY, startZ, startGal FROM PLACE WHERE PLACE.id = startid;
                 SELECT PLACE.x, PLACE.y, PLACE.z, PLACE.galaxy INTO finishX, finishY, finishZ, finishGal FROM PLACE WHERE PLACE.id = finishid;
+		if startX IS NULL OR startY IS NULL OR startZ IS NULL OR finishX IS NULL OR finishY IS NULL OR finishZ IS NULL THEN
+			RAISE EXCEPTION 'One or more coordinates is null';
+		END IF;
                 IF startGal != finishGal THEN
                         RAISE EXCEPTION 'Start and finish have different galaxies, cant find the distance';
                 END IF;
