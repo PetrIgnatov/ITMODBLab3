@@ -1,20 +1,12 @@
-CREATE FUNCTION place_stamp() RETURNS trigger AS $place_stamp$
+CREATE FUNCTION planet_check() RETURNS trigger AS $planet_check$
 	BEGIN
-		IF NEW.x IS NULL THEN
-			RAISE EXCEPTION 'Place x cannot be null';
-		END IF;
-		IF NEW.y IS NULL THEN
-                        RAISE EXCEPTION 'Place y cannot be null';
-                END IF;
-		IF NEW.z IS NULL THEN
-                        RAISE EXCEPTION 'Place z cannot be null';
-                END IF;
-		IF NEW.galaxy IS NULL THEN
-                        RAISE EXCEPTION 'Place galaxy cannot be null';
-                END IF;
-	END;
-$place_stamp$ LANGUAGE plpgsql;
+        IF (SELECT COUNT(*) FROM PLACE WHERE PLACE.id = NEW.placeid) = 0 THEN
+                INSERT INTO PLACE (id, x,y,z,galaxy) VALUES
+                        (NEW.placeid, 0, 0, 0,'Sample galaxy');
+        END IF;
+        RETURN NULL;
+END;
+$planet_check$ LANGUAGE plpgsql;
 
-CREATE TRIGGER place_stamp BEFORE INSERT OR UPDATE ON PLACE
-	FOR EACH ROW EXECUTE PROCEDURE place_stamp();
-
+CREATE TRIGGER planet_check BEFORE INSERT OR UPDATE ON PLANET
+        FOR EACH ROW EXECUTE PROCEDURE planet_check();
